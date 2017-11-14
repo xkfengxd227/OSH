@@ -64,19 +64,48 @@ Converge on neighborhood graph tends to encounter a lot of disk page accesses. W
 OSH can register the orientation of all neighbors of a node. During the ANN search, the orientation of the query w.r.t the current node can also be figured out quickly. We then sort all the orientation bit string and firstly choose the one with the most same orientation to expand. 
 \end{abstract}
 
-\section{Our Motivation}
+
+
+\section{Motivation}\label{ssec:moti}
+% 近邻图之于ANN搜索、为啥厉害
+NNG has now become a powerful tools to address ANN search, especially in high dimensions.
+
+
+%% 近邻图搜索算法的通病：随机IO太多，运算开销较大
+However, there is a common drawback in most search algorithms on NNG, they encounter large amount of random I/Os and consume large amount of original distance evaluations (which is very expensive in high dimensions). 
+% 原因：主要有三点、
+There are mainly three reasons.
+\begin{description}
+	\item [-] Due to the large volume of the dataset, it is reasonable to store the topology of the NNG apart from the original dataset. The topology of the NNG is a kind of inverted file, where each node maintains all the IDs of its neighbors. When converging on the NNG, the original data of the neighbors are loaded following the needs. This is a space-efficient storage strategy. Instead, one has to store multiple copies of the datasets. However, the disadvantage is obvious, the neighbors can not be stored adjacently on the disk. Therefore, all the load of the neighbor are of random I/O consumptions.
+	\item [-] Existing NNG search algorithms do not pay too much attention on random I/O savings.
+\end{description}
+
+
+The reason is that there is no reference that can be used to fastly discriminate the quality of the neighbors of the current node.
+A basic operation of NNG convergence is that when locating at a prior node, one needs to load and check the neighbors of the prior node to provide further converge route to the true NNs.
+
+Existing algorithms can be divided into two categories, the greedy ones and the backtrack ones.
+
+to construct further route to converge or 
+
+
+
 \textbf{We see how many places we can apply our OSH techniques.}
 
 \section{Introduction}\label{sec:intro}
+
+\section{Background}\label{sec:back}
 \subsection{Search algorithms on NNG}\label{ssec:search_algorithm}
 There has been a development over the search algorithms on NNG (or $k$-NNG).
 
+\subsubsection{Naive algorithm}\label{sssec:naive}
 A naive algorithm is the downhill search algorithm, as shown in Fig. \ref{fig:search_downhill}.
-\begin{figure}
+\begin{figure}[h]
 	\centering
 	\includegraphics[width=0.45\textwidth]{search_downhill.pdf} \\
 	\caption{Downhill search algorithm}\label{fig:search_downhill}
 \end{figure}
+
 
 
 In \cite{KianaFkNNG2011IJCAI}, the authors uses a ``best-first" strategy to search NNs: start from a random point $Y_0$, expand to the best neighbor among its $E$ neighbors, until it reaches a point who is better than any of its neighbor. Collect all encountered $E$ neighbors, find best $K$ ones as the $K$-NN search result. \textbf{The efficiency is very plain, the speedup around 3-16 on a 17k SIFT datasets with $K=30$}. 
@@ -101,6 +130,8 @@ NNGPQ~\cite{WangJDNNGPQ2013} uses a combination of kNNG and a bridge NNG. During
 
 $>$ It is concerned that there is a case which we do not take into account. If we only expand neighbors that are closer than the current point $O$, when $O$ is quite near to the query, a neighbor of $O$ which is even further than $O$ can be a true NN. For this case, we say that for all neighbors that are closer to $O$ we consider, 
 
+
+\section{Our methods}
 \section{Sketch of orientation sensitive hashing}\label{osh}
 
 Orientation sensitive, as the term suggests, means that we want to seize the orientation similarity between data points.
@@ -119,19 +150,23 @@ orient_q(p)=sign(op\cdot oq)
 \end{figure}
 
 
+We first define a function \textit{OSH\_order} that calculates OSH keys for all edges of a node 
+
+
 \section{Related Works}
 
 
 
+\section{Evaluation}
+
+
+
+\section{Conclusion}
 
 
 
 \subsection*{Acknowledgments}
 
-Use unnumbered third level headings for the acknowledgments. All
-acknowledgments go at the end of the paper. Do not include
-acknowledgments in the anonymized submission, only in the
-final paper.
 
 
 \bibliographystyle{IEEEtran}
